@@ -1,0 +1,23 @@
+{
+  "title": "Lesson 1 — Open D String",
+  "time_signature": "4/4",
+  "tempo_bpm": 60,
+  "measures": [
+    {
+      "measure": 1,
+      "events": [
+        { "type": "note", "pitch": "D4", "duration_beats": 1 },
+        { "type": "note", "pitch": "D4", "duration_beats": 1 },
+        { "type": "note", "pitch": "D4", "duration_beats": 1 },
+        { "type": "note", "pitch": "D4", "duration_beats": 1 }
+      ]
+    },
+    {
+      "measure": 2,
+      "events": [
+        { "type": "note", "pitch": "D4", "duration_beats": 2 },
+        { "type": "rest", "duration_beats": 2 }
+      ]
+    }
+  ]
+}

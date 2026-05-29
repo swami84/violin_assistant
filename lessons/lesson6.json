@@ -1,0 +1,43 @@
+{
+  "title": "Violin Exercise",
+  "time_signature": "4/4",
+  "tempo_bpm": 60,
+  "measures": [
+    {
+      "measure": 1,
+      "events": [
+        { "type": "note", "pitch": "D4", "duration_beats": 1 },
+        { "type": "note", "pitch": "D4", "duration_beats": 1 },
+        { "type": "note", "pitch": "E4", "duration_beats": 1 },
+        { "type": "note", "pitch": "E4", "duration_beats": 1 }
+      ]
+    },
+    {
+      "measure": 2,
+      "events": [
+        { "type": "note", "pitch": "F#4", "duration_beats": 1 },
+        { "type": "note", "pitch": "F#4", "duration_beats": 1 },
+        { "type": "note", "pitch": "E4", "duration_beats": 1 },
+        { "type": "note", "pitch": "E4", "duration_beats": 1 }
+      ]
+    },
+    {
+      "measure": 3,
+      "events": [
+        { "type": "note", "pitch": "G4", "duration_beats": 1 },
+        { "type": "note", "pitch": "G4", "duration_beats": 1 },
+        { "type": "note", "pitch": "F#4", "duration_beats": 1 },
+        { "type": "note", "pitch": "F#4", "duration_beats": 1 }
+      ]
+    },
+    {
+      "measure": 4,
+      "events": [
+        { "type": "note", "pitch": "E4", "duration_beats": 1 },
+        { "type": "note", "pitch": "E4", "duration_beats": 1 },
+        { "type": "note", "pitch": "D4", "duration_beats": 1 },
+        { "type": "note", "pitch": "D4", "duration_beats": 1 }
+      ]
+    }
+  ]
+}
