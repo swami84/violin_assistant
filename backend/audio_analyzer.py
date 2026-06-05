@@ -72,9 +72,11 @@ def analyze_audio(audio_bytes: bytes, tempo_bpm: float = 60.0) -> list[dict]:
         if len(valid) < 5:  # skip brief noise (bow touch, string squeak)
             continue
 
-        midi_num = int(round(librosa.hz_to_midi(float(np.median(valid)))))
+        freq_hz = float(np.median(valid))
+        midi_num = int(round(librosa.hz_to_midi(freq_hz)))
         notes.append({
             "pitch": midi_to_note_name(midi_num),
+            "freq_hz": round(freq_hz, 2),
             "start_sec": round(float(onset), 3),
             "duration_sec": round(float(end - onset), 3)
         })

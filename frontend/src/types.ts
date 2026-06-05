@@ -24,6 +24,7 @@ export interface ExpectedNote {
 
 export interface DetectedNote {
   pitch: string
+  freq_hz: number
   start_sec: number
   duration_sec: number
 }

@@ -3,29 +3,35 @@ import type { ExpectedNote, DetectedNote, NoteComparison, NoteResult } from '../
 const TIMING_TOLERANCE_SEC = 0.15
 const DURATION_TOLERANCE_RATIO = 0.50
 
-// Convert note name to MIDI number for enharmonic comparison
-function noteToMidi(note: string): number {
-  const noteMap: Record<string, number> = {
-    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
-    'E': 4, 'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8,
-    'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
-  }
-  const match = note.match(/^([A-G]#?b?)(\d)$/)
-  if (!match) return -1
-  const [, name, octave] = match
-  return (parseInt(octave) + 1) * 12 + (noteMap[name] ?? 0)
+const PITCH_HZ_TOLERANCE = 10  // Hz — accepts slightly out-of-tune instruments
+
+const NOTE_MAP: Record<string, number> = {
+  'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
+  'E': 4, 'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8,
+  'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
 }
 
-function pitchesMatch(a: string, b: string): boolean {
-  return noteToMidi(a) === noteToMidi(b)
+function noteToHz(note: string): number {
+  const match = note.match(/^([A-G]#?b?)(\d)$/)
+  if (!match) return 0
+  const [, name, octave] = match
+  const midi = (parseInt(octave) + 1) * 12 + (NOTE_MAP[name] ?? 0)
+  return 440 * Math.pow(2, (midi - 69) / 12)
+}
+
+// Accept if the detected frequency is within ±10 Hz of the expected note's frequency
+function pitchesMatch(expectedNote: string, detectedHz: number): boolean {
+  return Math.abs(detectedHz - noteToHz(expectedNote)) <= PITCH_HZ_TOLERANCE
 }
 
 export function compareNotes(
   expected: ExpectedNote[],
   detected: DetectedNote[]
 ): NoteComparison[] {
-  // Shift detected times so the first note starts at t=0, removing record-button delay
-  const offset = detected.length > 0 ? detected[0].start_sec : 0
+  // Anchor to the first note that was held long enough to be intentional (≥100ms).
+  // This absorbs any record-button delay and ignores stray transients at the start.
+  const anchor = detected.find(n => n.duration_sec >= 0.1) ?? detected[0]
+  const offset = anchor ? anchor.start_sec : 0
   const shifted = detected.map(n => ({ ...n, start_sec: n.start_sec - offset }))
 
   const results: NoteComparison[] = []
@@ -62,7 +68,7 @@ export function compareNotes(
     const durationRatio = Math.abs(det.duration_sec - exp.duration_sec) / exp.duration_sec
 
     let result: NoteResult
-    if (!pitchesMatch(exp.pitch!, det.pitch)) {
+    if (!pitchesMatch(exp.pitch!, det.freq_hz)) {
       result = 'wrong_pitch'
     } else if (timingErr > TIMING_TOLERANCE_SEC) {
       result = 'onset_late'
@@ -78,7 +84,9 @@ export function compareNotes(
       expected: exp,
       detected: det,
       result,
-      pitchError: result === 'wrong_pitch' ? `Expected ${exp.pitch}, got ${det.pitch}` : undefined,
+      pitchError: result === 'wrong_pitch'
+        ? `Expected ${exp.pitch} (${Math.round(noteToHz(exp.pitch!))}Hz), got ${det.pitch} (${Math.round(det.freq_hz)}Hz)`
+        : undefined,
       timingErrorSec: result !== 'wrong_pitch' ? timingErr : undefined,
       durationRatio: result === 'short_duration' ? durationRatio : undefined
     })
