@@ -151,6 +151,59 @@ Returns:
 
 ---
 
+## Production deployment (home server)
+
+Host securely from your own machine with HTTPS and password protection.
+
+### What the setup script does
+
+| Step | What happens |
+|------|-------------|
+| Packages | Installs nginx, openssl, ffmpeg, python3, node |
+| Password | Prompts you to set a site password (HTTP Basic Auth) |
+| TLS cert | Generates a self-signed certificate for your LAN IP (valid 10 years) |
+| Frontend | Builds the React app and serves it as static files via nginx |
+| Backend | Creates a Python venv, installs dependencies, runs uvicorn on `127.0.0.1:8000` (not exposed externally) |
+| Systemd | Registers `violin-backend.service` so the backend restarts on reboot |
+| Firewall | Opens ports 22 (SSH), 80 (redirect), 443 (HTTPS). Port 8000 is blocked externally |
+
+### Run
+
+```bash
+sudo bash deploy/setup.sh
+```
+
+You'll be prompted to set a password, then the script runs end-to-end (~2 min).  
+Open **`https://192.168.x.x`** (your LAN IP is printed at the end).
+
+> **Certificate warning**: browsers will show "Not secure / untrusted" because the cert is self-signed. Click **Advanced → Proceed**. The connection is fully encrypted — the warning is only because the cert wasn't issued by a public CA.
+
+### After code changes
+
+```bash
+sudo bash deploy/update.sh
+```
+
+Rebuilds the frontend, updates Python deps, and reloads both services.
+
+### Security model
+
+- All traffic is HTTPS (TLS 1.2/1.3 only)
+- Password required before any page or API call is served
+- Backend only listens on `127.0.0.1` — unreachable from the network directly
+- Rate limiting (10 req/min/IP) slows brute-force attempts
+- Security headers: HSTS, X-Frame-Options, X-Content-Type-Options
+- UFW firewall blocks all ports except 22, 80, 443
+
+### Sharing outside your home network
+
+To access from outside your LAN you need to:
+1. Forward port 443 on your router to this machine's LAN IP
+2. Find your public IP (`curl ifconfig.me`) and share that URL
+3. (Optional) Use a free DDNS service like [DuckDNS](https://www.duckdns.org) for a stable hostname
+
+---
+
 ## Tech stack
 
 | Layer | Technology |

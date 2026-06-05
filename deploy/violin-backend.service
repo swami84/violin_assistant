@@ -1,0 +1,16 @@
+[Unit]
+Description=Violin Rhythm Trainer – FastAPI backend
+After=network.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__PROJECT_DIR__/backend
+ExecStart=__PROJECT_DIR__/backend/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+# Only accept connections from nginx on localhost — not exposed externally
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
